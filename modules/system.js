@@ -20,7 +20,7 @@ var cors = require('cors');
 
 import registerRouter from './routes/register.js';
 import musicRouter from './routes/music.js';
-
+import adminRouter from "./routes/admin.js"
 
 export default function system() {
   var app = express();
@@ -72,6 +72,7 @@ export default function system() {
   // Use Router
   app.use("/register", registerRouter);
   app.use("/music", musicRouter);
+  app.use("/admin", adminRouter);
 
   app.use(cookieParser());
 
