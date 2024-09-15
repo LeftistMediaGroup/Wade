@@ -14,20 +14,22 @@ use mongodb::{ Client, options::ClientOptions, Collection };
 use crate::modules::database::database;
 use mongodb::results::InsertOneResult;
 
-pub async fn Get_Manifest() -> Vec<i32> {
-    let manifest: Vec<i32> = database::Get_Data(String::from("Manifest")).await;
-    manifest
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct Manifest_In {
+    pub cause: String,
+    pub organization: String,
+    pub admin_name: String,
 }
 
-pub async fn Init_Manifest() -> Manifest {
+pub async fn Init_Manifest(cause: String, organization: String, admin_name: String) -> Manifest {
     let init_time = {
         let system_time = SystemTime::now();
         let datetime: DateTime<Utc> = system_time.into();
 
-        datetime.format("%y/%m%d_%X").to_string()
+        datetime.format("%y%m%d_%X").to_string()
     };
 
-    let manifest: Manifest = New_Manifest().await;
+    let manifest: Manifest = New_Manifest(cause, organization, admin_name).await;
 
     let bson_manifest = bson::to_bson(&manifest).expect("BSON ERROR");
 
@@ -54,8 +56,8 @@ pub async fn Init_Manifest() -> Manifest {
     manifest
 }
 
-pub async fn New_Manifest() -> Manifest {
-    let manifest: Manifest = Manifest::New().await;
+pub async fn New_Manifest(cause: String, organization: String, admin_name: String) -> Manifest {
+    let manifest: Manifest = Manifest::New(cause, organization, admin_name).await;
     manifest
 }
 
@@ -66,10 +68,10 @@ pub struct Manifest {
 }
 
 impl Manifest {
-    pub async fn New() -> Manifest {
+    pub async fn New(cause: String, organization: String, admin_name: String) -> Manifest {
         let manifest: Manifest = Manifest {
             name: String::from("Wade"),
-            causes: vec![Cause::New_Cause()],
+            causes: vec![Cause::New_Cause(cause, organization, admin_name)],
         };
 
         manifest
@@ -80,36 +82,19 @@ impl Manifest {
 pub struct Cause {
     cause_name: String,
     create_time: String,
-    mongodb_url: String,
+
     orginizations: Vec<Organization>,
 }
 
 impl Cause {
-    pub fn New_Cause() -> Cause {
+    pub fn New_Cause(cause: String, organization: String, admin_name: String) -> Cause {
         let cause: Cause = Cause {
-            cause_name: Self::Cause_Name(),
+            cause_name: cause,
             create_time: Self::Cause_Init_Time(),
-            mongodb_url: String::from("mongodb://localhost:27017"),
-            orginizations: vec![Organization::New_Organization()],
+            orginizations: vec![Organization::New_Organization(organization, admin_name)],
         };
 
         cause
-    }
-
-    pub fn Cause_Name() -> String {
-        let stdin = io::stdin();
-
-        println!("Enter New Cause\n");
-
-        let locked = stdin.lock();
-        let input: Vec<String> = locked
-            .lines()
-            .filter_map(|line| line.ok())
-            .collect();
-
-        println!("Cause: {}", input[0]);
-
-        input[0].clone()
     }
 
     pub fn Cause_Init_Time() -> String {
@@ -127,92 +112,33 @@ pub struct Organization {
 }
 
 impl Organization {
-    pub fn New_Organization() -> Organization {
+    pub fn New_Organization(organization: String, admin_name: String) -> Organization {
         let organization: Organization = Organization {
-            orginaization_name: Self::Organization_Name(),
-            orginization_admins: vec![Admin::New_Admin()],
+            orginaization_name: organization,
+            orginization_admins: vec![Admin::New_Admin(admin_name)],
         };
 
         organization
     }
+}
 
-    pub fn Organization_Name() -> String {
-        let stdin = io::stdin();
-
-        println!("Enter New Organization Name\n");
-
-        let locked = stdin.lock();
-        let input: Vec<String> = locked
-            .lines()
-            .filter_map(|line| line.ok())
-            .collect();
-
-        println!("Organization: {}", input[0]);
-
-        input[0].clone()
-    }
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct Vault {
+    vault_name: String,
+    vault_url: String,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Admin {
     admin_name: String,
-    admin_pass: String,
 }
 
 impl Admin {
-    pub fn New_Admin() -> Admin {
+    pub fn New_Admin(admin_name: String) -> Admin {
         let admin: Admin = Admin {
-            admin_name: Self::Admin_Name(),
-            admin_pass: Self::Admin_Pass(),
+            admin_name: admin_name,
         };
 
         admin
-    }
-
-    pub fn Admin_Name() -> String {
-        let stdin = io::stdin();
-
-        println!("Enter Admin Name\n");
-
-        let locked = stdin.lock();
-        let input: Vec<String> = locked
-            .lines()
-            .filter_map(|line| line.ok())
-            .collect();
-        println!("Admin: {}", input[0].clone());
-
-        input[0].clone()
-    }
-
-    pub fn Admin_Pass() -> String {
-        let finalpass = loop {
-            let stdin = io::stdin();
-
-            println!("Enter Admin Password\n");
-
-            let locked = stdin.lock();
-            let input1: Vec<String> = locked
-                .lines()
-                .filter_map(|line| line.ok())
-                .collect();
-
-            println!("Reenter Admin Password\n");
-
-            let locked = stdin.lock();
-            let input2: Vec<String> = locked
-                .lines()
-                .filter_map(|line| line.ok())
-                .collect();
-
-            if input1[0].clone() == input2[0].clone() {
-                println!("Passwords Matched");
-
-                break input1[0].clone();
-            } else {
-                println!("Passwords do not match, Try Again");
-            }
-        };
-
-        finalpass
     }
 }
