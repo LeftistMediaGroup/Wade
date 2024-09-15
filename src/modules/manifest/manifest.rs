@@ -19,9 +19,15 @@ pub struct Manifest_In {
     pub cause: String,
     pub organization: String,
     pub admin_name: String,
+    pub admin_pass: String,
 }
 
-pub async fn Init_Manifest(cause: String, organization: String, admin_name: String) -> Manifest {
+pub async fn Init_Manifest(
+    cause: String,
+    organization: String,
+    admin_name: String,
+    admin_pass: String
+) -> Manifest {
     let init_time = {
         let system_time = SystemTime::now();
         let datetime: DateTime<Utc> = system_time.into();
@@ -29,7 +35,7 @@ pub async fn Init_Manifest(cause: String, organization: String, admin_name: Stri
         datetime.format("%y%m%d_%X").to_string()
     };
 
-    let manifest: Manifest = New_Manifest(cause, organization, admin_name).await;
+    let manifest: Manifest = New_Manifest(cause, organization, admin_name, admin_pass).await;
 
     let bson_manifest = bson::to_bson(&manifest).expect("BSON ERROR");
 
@@ -56,8 +62,13 @@ pub async fn Init_Manifest(cause: String, organization: String, admin_name: Stri
     manifest
 }
 
-pub async fn New_Manifest(cause: String, organization: String, admin_name: String) -> Manifest {
-    let manifest: Manifest = Manifest::New(cause, organization, admin_name).await;
+pub async fn New_Manifest(
+    cause: String,
+    organization: String,
+    admin_name: String,
+    admin_pass: String
+) -> Manifest {
+    let manifest: Manifest = Manifest::New(cause, organization, admin_name, admin_pass).await;
     manifest
 }
 
@@ -68,10 +79,15 @@ pub struct Manifest {
 }
 
 impl Manifest {
-    pub async fn New(cause: String, organization: String, admin_name: String) -> Manifest {
+    pub async fn New(
+        cause: String,
+        organization: String,
+        admin_name: String,
+        admin_pass: String
+    ) -> Manifest {
         let manifest: Manifest = Manifest {
             name: String::from("Wade"),
-            causes: vec![Cause::New_Cause(cause, organization, admin_name)],
+            causes: vec![Cause::New_Cause(cause, organization, admin_name, admin_pass)],
         };
 
         manifest
@@ -87,11 +103,18 @@ pub struct Cause {
 }
 
 impl Cause {
-    pub fn New_Cause(cause: String, organization: String, admin_name: String) -> Cause {
+    pub fn New_Cause(
+        cause: String,
+        organization: String,
+        admin_name: String,
+        admin_pass: String
+    ) -> Cause {
         let cause: Cause = Cause {
             cause_name: cause,
             create_time: Self::Cause_Init_Time(),
-            orginizations: vec![Organization::New_Organization(organization, admin_name)],
+            orginizations: vec![
+                Organization::New_Organization(organization, admin_name, admin_pass)
+            ],
         };
 
         cause
@@ -112,10 +135,14 @@ pub struct Organization {
 }
 
 impl Organization {
-    pub fn New_Organization(organization: String, admin_name: String) -> Organization {
+    pub fn New_Organization(
+        organization: String,
+        admin_name: String,
+        admin_pass: String
+    ) -> Organization {
         let organization: Organization = Organization {
             orginaization_name: organization,
-            orginization_admins: vec![Admin::New_Admin(admin_name)],
+            orginization_admins: vec![Admin::New_Admin(admin_name, admin_pass)],
         };
 
         organization
@@ -131,12 +158,14 @@ pub struct Vault {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Admin {
     admin_name: String,
+    admin_pass: String,
 }
 
 impl Admin {
-    pub fn New_Admin(admin_name: String) -> Admin {
+    pub fn New_Admin(admin_name: String, admin_pass: String) -> Admin {
         let admin: Admin = Admin {
             admin_name: admin_name,
+            admin_pass: admin_pass,
         };
 
         admin

@@ -1,7 +1,10 @@
 use socketioxide::{ extract::{ Data, SocketRef }, SocketIo };
 use mongodb::{ Client, options::ClientOptions };
 use bson::Document;
+use bson::{ Bson, Document as BSONDocument };
+
 use serde_json::Value;
+use serde_json::json;
 use bson::doc;
 use crate::modules::manifest::manifest::Manifest;
 use crate::modules::manifest::manifest::Init_Manifest;
@@ -22,7 +25,9 @@ pub fn init_socketio_main(io: SocketIo) {
         });
 
         socket.on("database_init", |s: SocketRef| async move {
-            let client_options = ClientOptions::parse("mongodb://localhost:27017").await.unwrap();
+            let client_options: ClientOptions = ClientOptions::parse(
+                "mongodb://localhost:27017"
+            ).await.unwrap();
             let client: Client = Client::with_options(client_options).unwrap();
 
             let collection: mongodb::Collection<bson::Document> = client
@@ -45,27 +50,22 @@ pub fn init_socketio_main(io: SocketIo) {
             }
         });
 
-        socket.on("register_admin", |_socket: SocketRef, Data::<Value>(data)| async move {
+        socket.on("manifest_init", |s: SocketRef, Data::<Value>(data)| async move {
             let data: Manifest_In = serde_json::from_str(&data.to_string()).unwrap();
 
-            let manifest: Manifest = Init_Manifest(
+            let _manifest: Manifest = Init_Manifest(
                 data.cause,
                 data.organization,
-                data.admin_name
+                data.admin_name,
+                data.admin_pass
             ).await;
-
-            println!("Manifest: {:#?}", manifest);
         });
 
-        socket.on("Encrypt", |_socket: SocketRef| async move {
+        socket.on("Encrypt", |s: SocketRef| async move {
             println!("Encrypt:");
-            let _local_key = generate_local_key();
+            let local_key = generate_local_key().await;
+
+            s.emit("admin_pass", local_key);
         });
     });
 }
-
-/*
-socket.on("message", |_socket: SocketRef, Data::<String>(data)| async move {
-println!("Received message: {:?}", data);
-});
-*/
