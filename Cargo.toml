@@ -25,3 +25,4 @@ socket2 = "0.5.7"
 serde_json = "1.0.128"
 base64 = "0.22.1"
 rand = { version = "0.8.4", features = ["std"] }
+random_name_generator = "0.3.6"

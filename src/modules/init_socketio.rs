@@ -1,7 +1,6 @@
 use socketioxide::{ extract::{ Data, SocketRef }, SocketIo };
 use mongodb::{ Client, options::ClientOptions };
 use bson::Document;
-use bson::{ Bson, Document as BSONDocument };
 
 use serde_json::Value;
 use serde_json::json;
@@ -12,6 +11,8 @@ use crate::modules::manifest::manifest::Init_Manifest;
 use crate::modules::manifest::manifest::Manifest_In;
 use crate::modules::database::database::Get_Manifest;
 use crate::modules::encryption::encryption::generate_local_key;
+
+use rnglib::{ RNG, Language };
 
 pub fn init_socketio_main(io: SocketIo) {
     io.ns("/", |socket: SocketRef| {
@@ -61,11 +62,26 @@ pub fn init_socketio_main(io: SocketIo) {
             ).await;
         });
 
-        socket.on("Encrypt", |s: SocketRef| async move {
+        socket.on("new_user", |s: SocketRef| async move {
             println!("Encrypt:");
             let local_key = generate_local_key().await;
 
-            s.emit("admin_pass", local_key);
+            let rng = RNG::try_from(&Language::Demonic).unwrap();
+
+            let first_name = rng.generate_name();
+            let last_name = rng.generate_name();
+
+            let data_out =
+                doc! {
+                "username": first_name + "-" + &last_name,
+                "local_key": local_key
+            };
+
+            s.emit("user_details", data_out);
         });
+
+        socket.on("create_user", |_s: SocketRef, Data::<Value>(data)| async move {
+            println!("Data: {:#?}", data);
+        })
     });
 }
