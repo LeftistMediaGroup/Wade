@@ -53,11 +53,7 @@ pub async fn Init_Manifest(
         .database("Wade")
         .collection("Init");
 
-    let doc_insert_result: Result<Result<InsertOneResult, _>, mongodb::error::Error> = Ok(
-        collection.insert_one(new_doc.clone(), None).await
-    );
-
-    println!("Inserted Manifest: {:#?}", doc_insert_result);
+    //insert_encrypted_doc(new_doc).await;
 
     manifest
 }
@@ -147,12 +143,6 @@ impl Organization {
 
         organization
     }
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct Vault {
-    vault_name: String,
-    vault_url: String,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]

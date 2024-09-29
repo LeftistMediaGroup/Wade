@@ -31,4 +31,3 @@ pub async fn Get_Manifest(url: String) -> Result<Document, mongodb::error::Error
 
     Ok(data_get_result.expect("REASON"))
 }
-

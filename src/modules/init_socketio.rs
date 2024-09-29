@@ -5,18 +5,21 @@ use bson::Document;
 use serde_json::Value;
 use serde_json::json;
 use bson::doc;
-use crate::modules::manifest::manifest::Manifest;
+use crate::modules::{
+    encryption::local_encryption::{ does_key_exist },
+    manifest::manifest::Manifest,
+};
 use crate::modules::manifest::manifest::Init_Manifest;
 
 use crate::modules::manifest::manifest::Manifest_In;
 use crate::modules::database::database::Get_Manifest;
-use crate::modules::encryption::encryption::generate_local_key;
+use crate::modules::encryption::encryption::generate_short_key;
 
 use rnglib::{ RNG, Language };
 
 pub fn init_socketio_main(io: SocketIo) {
     io.ns("/", |socket: SocketRef| {
-        println!("socket connected: {}", socket.id);
+        println!("\nsocket connected: {}\n", socket.id);
 
         socket.on("join", |socket: SocketRef, Data::<String>(room)| async move {
             println!("Received join: {:?}", room);
@@ -26,26 +29,16 @@ pub fn init_socketio_main(io: SocketIo) {
         });
 
         socket.on("database_init", |s: SocketRef| async move {
-            let client_options: ClientOptions = ClientOptions::parse(
-                "mongodb://localhost:27017"
-            ).await.unwrap();
-            let client: Client = Client::with_options(client_options).unwrap();
+            let data = does_key_exist().await;
 
-            let collection: mongodb::Collection<bson::Document> = client
-                .database("Wade")
-                .collection("Init");
+            let pass = data.pass;
+            let data_get_result = data.created;
 
-            let data_get_result = collection
-                .find_one(
-                    doc! {
-                    "title": "Wade_Manifest"
-                },
-                    None
-                ).await
-                .expect("Reason");
+            println!("Data: {:#?}", data_get_result);
 
-            if data_get_result.is_none() {
+            if data_get_result == "False".to_string() {
                 s.emit("database_init", "False");
+                s.emit("admin_pass", pass);
             } else {
                 s.emit("database_init", "True");
             }
@@ -60,11 +53,15 @@ pub fn init_socketio_main(io: SocketIo) {
                 data.admin_name,
                 data.admin_pass
             ).await;
+
+            //let result = encrypt_doc(doc! { "test": "test" }).await;
+
+            //println!("Result: {:#?}", result);
         });
 
         socket.on("new_user", |s: SocketRef| async move {
             println!("Encrypt:");
-            let local_key = generate_local_key().await;
+            let local_key = generate_short_key().await;
 
             let rng = RNG::try_from(&Language::Demonic).unwrap();
 
