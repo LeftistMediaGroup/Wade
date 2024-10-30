@@ -1,0 +1,12 @@
+[package]
+name = "crypto"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+rsa = "0.9.6"
+base64 = "0.22.1"
+rand = "0.8.5"
+openssl = "0.10.68"
+pem = "3.0.4"
+pkcs1 = "0.7.5"

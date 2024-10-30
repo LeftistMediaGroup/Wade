@@ -1,5 +1,6 @@
 mod modules;
 use modules::{ init_server::init_server_main, init_database::init_database_main };
+use std::process::Command;
 
 use dotenv::dotenv;
 
@@ -15,5 +16,14 @@ async fn main() {
 
     println!("\n\nWelcome to Wade!\n");
 
-    init_modules().await;
+    launch_react();
+
+    init_modules().await;    
+}
+
+pub fn launch_react() {
+    Command::new("npm")
+        .args(vec!["run", "dev", "--prefix", "lmg"])
+        .spawn()
+        .unwrap();
 }

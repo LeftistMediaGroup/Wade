@@ -1,0 +1,132 @@
+.App {
+  text-align: center;
+}
+.debug * { border: 1px solid #c0c; }
+.main {
+  padding-top: 60px;
+  padding-bottom: 60px;
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+.sidebar {
+  padding-top: 50px;
+  padding-bottom: 50px;
+  background-color: #121212;
+  text-align: center;
+  padding-top: 60;
+  position: relative;
+  max-width: fit-content;
+}
+
+body {
+  background-color: linear-gradient(rgb(33, 37, 41), #000);
+}
+
+a {
+  color: red;
+  text-decoration: none;
+  transition: all 0.3s ease-in-out;
+}
+
+a:hover,
+a:focus {
+  color: red;
+  text-decoration: underline;
+}
+
+
+
+.card { 
+  background-color: linear-gradient(rgb(33, 37, 41), #000);
+  /* border: 0 none transparent; */
+}
+
+.card .MuiCardContent-root {
+  background-color: #000;
+  /* border: 1px solid red; */
+ 
+}
+
+
+.page-header {
+  background-color: #000;
+  border: 1px solid red;
+  border-radius: 8px;
+  display: flex;
+  justify-content: flex-start;
+  padding: 5px 0;
+}
+
+.page-header nav {
+  padding: 0 5px;
+  display: flex;
+  align-items: center;  
+}
+
+.page-header nav .breadcrumb {
+  background-color: #000;
+  margin: auto;
+}
+
+.page-header nav .breadcrumb .breadcrumb-item {
+  
+}
+
+.page-header nav .breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+  color: red;
+}
+
+.page-header nav .breadcrumb .breadcrumb-item a {
+  color: red;
+  padding: 5px;
+  border-radius: 4px;
+  transition: all 0.3s ease-in-out;
+}
+
+.page-header nav .breadcrumb .breadcrumb-item a:hover,
+.page-header nav .breadcrumb .breadcrumb-item a:focus {
+  background-color: red;
+  color: white;
+}
+
+.page-header nav .breadcrumb .breadcrumb-item.active {
+  color: white;
+}
+
+.sidebarWrapper {
+  height: 100%;
+  padding-top: 60;
+}
+
+.songCard {
+  max-width: 250px;
+}
+
+.RevolutionTelevision {
+  position: fixed;
+  z-index: 1;
+  align-self: center;
+}
+
+.PMSDiscordCol {
+  border-color: red;
+  border-width: 1px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  padding-left: 13px;
+  width: 110px;
+}
