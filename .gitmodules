@@ -1,0 +1,3 @@
+[submodule "lmg"]
+	path = lmg
+	url = https://github.com/LeftistMediaGroup/lmg.git
