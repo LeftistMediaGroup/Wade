@@ -4,7 +4,7 @@ use tower_http::cors::CorsLayer;
 use socketioxide::SocketIo;
 use http::Method;
 
-use crate::modules::init_socketio::init_socketio_main;
+use super::init_socketio::init_socketio_main;
 
 pub async fn init_server_main() -> Result<(), Box<dyn std::error::Error>> {
     let (socketio_layer, io) = SocketIo::builder().build_layer();
@@ -23,7 +23,6 @@ pub async fn init_server_main() -> Result<(), Box<dyn std::error::Error>> {
         .layer(ServiceBuilder::new().layer(layer_cors).layer(socketio_layer));
 
     println!("Starting server");
-    println!("Connect and point Front-End to ws://localhost:5501 to continue Init");
 
     let listener = TcpListener::bind("0.0.0.0:5501").await.unwrap();
     axum::serve(listener, app).await.unwrap();
