@@ -1,12 +1,9 @@
 [package]
-name = "crypto"
+name = "crypto1"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-rsa = "0.9.6"
-base64 = "0.22.1"
-rand = "0.8.5"
-openssl = "0.10.68"
-pem = "3.0.4"
-pkcs1 = "0.7.5"
+aes = "0.7.5"  # Check for the latest version on crates.io
+hex = "0.4"     # For encoding the encrypted bytes to a hex string
+rand = "0.8"    # Optional, only if you plan to use randomness later

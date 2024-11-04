@@ -1,11 +1,89 @@
-use rsa::{ Pkcs1v15Encrypt, RsaPrivateKey, RsaPublicKey };
-use rsa::pkcs8::EncodePrivateKey;
+use aes::{ Aes128, BlockEncrypt, BlockDecrypt, NewBlockCipher };
+use aes::cipher::{ generic_array::GenericArray, Block };
+use hex;
+use std::fmt;
 
-fn main() {
-    let mut rng = rand::thread_rng();
-    let bits = 2048;
-    let priv_key = RsaPrivateKey::new(&mut rng, bits).expect("failed to generate a key");
-    let pub_key = RsaPublicKey::from(&priv_key);
+const BLOCK_SIZE: usize = 16;
 
-    let priv_key2 = priv_key.to_pkcs8_pem();
+#[derive(Debug)]
+struct EncryptionError;
+
+impl fmt::Display for EncryptionError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Encryption error")
+    }
+}
+fn pad(data: &str) -> Vec<u8> {
+    let pad_size = BLOCK_SIZE - (data.len() % BLOCK_SIZE);
+    let mut padded = data.as_bytes().to_vec();
+    padded.extend(vec![pad_size as u8; pad_size]);
+    padded
+}
+
+fn unpad(data: &[u8]) -> Vec<u8> {
+    let pad_size = data[data.len() - 1] as usize;
+    data[..data.len() - pad_size].to_vec()
+}
+
+pub fn encrypt(password: &str, data: &str) -> Result<String, EncryptionError> {
+    let mut key = [0u8; 16];
+    let password_bytes = password.as_bytes();
+    let len = password_bytes.len().min(16);
+    key[..len].copy_from_slice(&password_bytes[..len]);
+
+    let cipher = Aes128::new(&GenericArray::from_slice(&key));
+
+    let padded_data = pad(data);
+    let mut encrypted = vec![0u8; padded_data.len()];
+
+    for (i, chunk) in padded_data.chunks(BLOCK_SIZE).enumerate() {
+        let mut block = GenericArray::clone_from_slice(chunk);
+        cipher.encrypt_block(&mut block);
+        encrypted[i * BLOCK_SIZE..(i + 1) * BLOCK_SIZE].copy_from_slice(&block);
+    }
+
+    Ok(hex::encode(encrypted))
+}
+
+pub fn decrypt(password: &str, encrypted_hex: &str) -> Result<String, EncryptionError> {
+    let mut key = [0u8; 16];
+    let password_bytes = password.as_bytes();
+    let len = password_bytes.len().min(16);
+    key[..len].copy_from_slice(&password_bytes[..len]);
+
+    let cipher = Aes128::new(&GenericArray::from_slice(&key));
+
+    let encrypted_bytes = hex::decode(encrypted_hex).map_err(|_| EncryptionError)?;
+    let mut decrypted = vec![0u8; encrypted_bytes.len()];
+
+    for (i, chunk) in encrypted_bytes.chunks(BLOCK_SIZE).enumerate() {
+        let mut block = GenericArray::clone_from_slice(chunk);
+        cipher.decrypt_block(&mut block);
+        decrypted[i * BLOCK_SIZE..(i + 1) * BLOCK_SIZE].copy_from_slice(&block);
+    }
+
+    let unpadded = unpad(&decrypted);
+    String::from_utf8(unpadded).map_err(|_| EncryptionError)
+}
+
+pub fn main() {
+    let password = "mysecretpassword";
+    let data = "This is some data to encrypt.";
+
+    match encrypt(password, data) {
+        Ok(encrypted_text) => {
+            println!("Encrypted text: {}", encrypted_text);
+            match decrypt(password, &encrypted_text) {
+                Ok(decrypted_text) => {
+                    println!("Decrypted text: {}", decrypted_text);
+                }
+                Err(e) => {
+                    eprintln!("Error decrypting data: {}", e);
+                }
+            }
+        }
+        Err(e) => {
+            eprintln!("Error encrypting data: {}", e);
+        }
+    }
 }

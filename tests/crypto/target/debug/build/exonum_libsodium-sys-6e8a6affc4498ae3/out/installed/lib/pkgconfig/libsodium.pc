@@ -1,0 +1,12 @@
+prefix=/home/max/Documents/Code/Dev/Wade/tests/crypto/target/debug/build/exonum_libsodium-sys-6e8a6affc4498ae3/out/installed
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: libsodium
+Version: 1.0.18
+Description: A modern and easy-to-use crypto library
+
+Libs: -L${libdir} -lsodium
+Libs.private:  -pthread 
+Cflags: -I${includedir}

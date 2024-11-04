@@ -5,7 +5,7 @@ use std::process::Command;
 use dotenv::dotenv;
 
 async fn init_modules() {
-    //init_database_main().await;
+    init_database_main().await;
 
     init_server_main().await.expect("REASON")
 }
