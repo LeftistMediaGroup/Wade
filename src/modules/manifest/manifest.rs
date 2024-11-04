@@ -26,21 +26,12 @@ pub async fn does_manifest_exist() -> bool {
 }
 
 pub async fn init_manifest(cause: String, organization: String, admin_name: String) -> Manifest {
-    let init_time = {
-        let system_time = SystemTime::now();
-        let datetime: DateTime<Utc> = system_time.into();
-
-        datetime.format("%y%m%d_%X").to_string()
-    };
-
     let manifest: Manifest = new_manifest(cause, organization, admin_name).await;
 
     let bson_manifest = bson::to_bson(&manifest).expect("BSON ERROR");
 
-    let new_doc =
-        doc! {
+    let new_doc = doc! {
         "title": "Wade_Manifest",
-        "init_time": init_time,
         "details": bson_manifest,
      };
 
@@ -51,7 +42,7 @@ pub async fn init_manifest(cause: String, organization: String, admin_name: Stri
         .database("Wade")
         .collection("Init");
 
-    //insert_encrypted_doc(new_doc).await;
+    collection.insert_one(new_doc.clone(), None).await;
 
     manifest
 }
@@ -108,7 +99,6 @@ impl Manifest {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Cause {
     cause_name: String,
-    create_time: String,
 
     orginizations: Vec<Organization>,
 }
@@ -117,18 +107,10 @@ impl Cause {
     pub fn New_Cause(cause: String, organization: String, admin_name: String) -> Cause {
         let cause: Cause = Cause {
             cause_name: cause,
-            create_time: Self::Cause_Init_Time(),
             orginizations: vec![Organization::New_Organization(organization, admin_name)],
         };
 
         cause
-    }
-
-    pub fn Cause_Init_Time() -> String {
-        let system_time = SystemTime::now();
-        let datetime: DateTime<Utc> = system_time.into();
-
-        datetime.format("%y/%m%d_%X").to_string()
     }
 }
 

@@ -7,6 +7,11 @@ use rnglib::{ RNG, Language };
 
 use crate::modules::{ manifest::manifest::*, encryption::encryption::*, crypto::crypto::* };
 
+use std::time::SystemTime;
+extern crate chrono;
+use chrono::offset::Utc;
+use chrono::DateTime;
+
 use super::super::system::system::*;
 
 pub fn init_socketio_main(io: SocketIo) {
@@ -38,10 +43,13 @@ pub fn init_socketio_main(io: SocketIo) {
         socket.on("manifest_init", |s: SocketRef, Data::<Value>(data)| async move {
             let data: Admin_data = serde_json::from_str(&data.to_string()).unwrap();
 
+            let system_time = SystemTime::now();
+            let datetime: DateTime<Utc> = system_time.into();
+
             let manifest = init_manifest(
                 encrypt(&data.admin_pass, &data.cause).await.unwrap(),
                 encrypt(&data.admin_pass, &data.organization).await.unwrap(),
-                encrypt(&data.admin_pass, &data.admin_name).await.unwrap()
+                encrypt(&data.admin_pass, &data.admin_name).await.unwrap(),
             ).await;
 
             println!("Manifest: {:?}", manifest);
