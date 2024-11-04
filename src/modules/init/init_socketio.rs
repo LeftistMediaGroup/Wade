@@ -38,28 +38,13 @@ pub fn init_socketio_main(io: SocketIo) {
         socket.on("manifest_init", |s: SocketRef, Data::<Value>(data)| async move {
             let data: Admin_data = serde_json::from_str(&data.to_string()).unwrap();
 
-            println!("Data: {:#?}", data);
-
-            println!("DATA: {:?}", data.admin_pass);
-
-            let encrypted = encrypt(&data.admin_pass, &data.cause).await.unwrap();
-
-            println!("Encrypted: {:?}", encrypted);
-
-            let decypted = decrypt(&data.admin_pass, &encrypted).await.unwrap();
-
-            println!("Decrypted: {:?}", decypted);
-
-            /*let _manifest: Manifest = init_manifest(
-                data.cause,
-                data.organization,
-                data.admin_name
+            let manifest = init_manifest(
+                encrypt(&data.admin_pass, &data.cause).await.unwrap(),
+                encrypt(&data.admin_pass, &data.organization).await.unwrap(),
+                encrypt(&data.admin_pass, &data.admin_name).await.unwrap()
             ).await;
 
-            //let result = encrypt_doc(doc! { "test": "test" }).await;
-
-            //println!("Result: {:#?}", result);
-            */
+            println!("Manifest: {:?}", manifest);
         });
 
         socket.on("create_user", |_s: SocketRef, Data::<Value>(data)| async move {
