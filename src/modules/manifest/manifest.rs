@@ -16,7 +16,7 @@ pub async fn does_manifest_exist() -> bool {
         .database("Wade")
         .collection("Init");
 
-    let result = match collection.find_one(doc! { "title": "Wade_manifest" }, None).await {
+    let result = match collection.find_one(doc! { "title": "Wade_Manifest" }, None).await {
         Ok(Some(data)) => { true }
         Err(err) => { false }
         Ok(None) => { false }

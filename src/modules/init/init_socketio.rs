@@ -27,6 +27,7 @@ pub fn init_socketio_main(io: SocketIo) {
 
         socket.on("wade_init", |s: SocketRef| async move {
             let result = does_manifest_exist().await;
+
             if result {
                 s.emit("wade_init", true);
             } else {
@@ -49,7 +50,7 @@ pub fn init_socketio_main(io: SocketIo) {
             let manifest = init_manifest(
                 encrypt(&data.admin_pass, &data.cause).await.unwrap(),
                 encrypt(&data.admin_pass, &data.organization).await.unwrap(),
-                encrypt(&data.admin_pass, &data.admin_name).await.unwrap(),
+                encrypt(&data.admin_pass, &data.admin_name).await.unwrap()
             ).await;
 
             println!("Manifest: {:?}", manifest);
