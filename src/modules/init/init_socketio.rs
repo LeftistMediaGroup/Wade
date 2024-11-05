@@ -47,9 +47,6 @@ pub fn init_socketio_main(io: SocketIo) {
         socket.on("manifest_init", |s: SocketRef, Data::<Value>(data)| async move {
             let data: Admin_data = serde_json::from_str(&data.to_string()).unwrap();
 
-            let system_time = SystemTime::now();
-            let datetime: DateTime<Utc> = system_time.into();
-
             let manifest = init_manifest(
                 encrypt(&data.admin_pass, &data.cause).await.unwrap(),
                 encrypt(&data.admin_pass, &data.organization).await.unwrap(),
@@ -57,6 +54,8 @@ pub fn init_socketio_main(io: SocketIo) {
             ).await;
 
             println!("Manifest: {:?}", manifest);
+
+            create_user(data.admin_name, data.admin_pass, &String::from("false")).await;
         });
 
         socket.on("log_in", |s: SocketRef, Data::<Value>(data)| async move {

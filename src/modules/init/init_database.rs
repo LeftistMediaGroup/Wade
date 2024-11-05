@@ -1,6 +1,7 @@
 extern crate mongodb;
 use mongodb::{ Client, options::ClientOptions };
 
+use crate::modules::database::database::create_collection;
 use crate::modules::database::database::create_database;
 
 pub async fn init_database_main() {
@@ -29,6 +30,11 @@ pub async fn init_database_main() {
     } else {
         println!("Database Not Found\nCreating new Database");
 
-        create_database(&client).await;
+        create_database().await;
+        init_database_modules().await;
     }
+}
+
+async fn init_database_modules() {
+    create_collection(&String::from("accounts")).await;
 }
