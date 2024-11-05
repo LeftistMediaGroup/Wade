@@ -10,7 +10,11 @@ Install and run
 
 git clone https://github.com/LeftistMediaGroup/wade
 
-cargo run
+cargo run  
+
+/ or /
+
+cargo watch -x run --ignore lmg
 
 
 Project Todo (Roadmap)

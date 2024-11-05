@@ -1,6 +1,8 @@
 extern crate mongodb;
 use mongodb::{ Client, options::ClientOptions };
 
+use crate::modules::database::database::create_database;
+
 pub async fn init_database_main() {
     println!("\nConnecting to localhost database");
 
@@ -29,18 +31,4 @@ pub async fn init_database_main() {
 
         create_database(&client).await;
     }
-}
-
-async fn create_database(client: &Client) {
-    let db_name = String::from("Wade");
-    let coll_name = String::from("Init");
-
-    create_collection(&client, &db_name, &coll_name).await;
-}
-
-async fn create_collection(client: &Client, db_name: &str, coll_name: &str) {
-    let db = client.database(db_name);
-    db.create_collection(coll_name, None).await.unwrap();
-
-    println!("Database Created");
 }

@@ -5,14 +5,17 @@ use serde_json::Value;
 use bson::doc;
 use rnglib::{ RNG, Language };
 
-use crate::modules::{ manifest::manifest::*, encryption::encryption::*, crypto::crypto::* };
+use crate::modules::{
+    manifest::manifest::*,
+    encryption::encryption::*,
+    crypto::crypto::*,
+    account::account::*,
+};
 
 use std::time::SystemTime;
 extern crate chrono;
 use chrono::offset::Utc;
 use chrono::DateTime;
-
-use super::super::system::system::*;
 
 pub fn init_socketio_main(io: SocketIo) {
     io.ns("/", |socket: SocketRef| {
@@ -56,9 +59,17 @@ pub fn init_socketio_main(io: SocketIo) {
             println!("Manifest: {:?}", manifest);
         });
 
-        socket.on("create_user", |_s: SocketRef, Data::<Value>(data)| async move {
-            println!("Data: {:#?}", data);
-        })
+        socket.on("log_in", |s: SocketRef, Data::<Value>(data)| async move {
+            let data: Login_data = serde_json::from_str(&data.to_string()).unwrap();
+
+            let result: Option<Document> = does_account_exist(&data.username).await;
+
+            if result.is_none() {
+                s.emit("log_in", false);
+            } else {
+                println!("Account: {:?}", result);
+            }
+        });
     });
 }
 
@@ -68,4 +79,10 @@ pub struct Admin_data {
     pub organization: String,
     pub admin_name: String,
     pub admin_pass: String,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct Login_data {
+    pub username: String,
+    pub password: String,
 }
