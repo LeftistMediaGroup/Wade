@@ -55,21 +55,34 @@ pub fn init_socketio_main(io: SocketIo) {
 
             println!("Manifest: {:?}", manifest);
 
-            create_user(data.admin_name, data.admin_pass, &String::from("false")).await;
+            create_user(data.admin_name, data.admin_pass, String::from("false")).await;
         });
 
         socket.on("log_in", |s: SocketRef, Data::<Value>(data)| async move {
             let data: Login_data = serde_json::from_str(&data.to_string()).unwrap();
 
-            let result: Option<Document> = does_account_exist(&data.username).await;
+            let user = get_account(&data.username).await;
 
-            if result.is_none() {
+            if !user.clone().is_some() {
                 s.emit("log_in", false);
             } else {
-                println!("Account: {:?}", result);
+                println!("User: {:?}", user);
+
+                check_pass(
+                    user.clone().unwrap().username,
+                    user.clone().unwrap().encrypt_test,
+                    &data.password
+                ).await;
             }
         });
     });
+}
+
+async fn check_pass(username: String, encrpt_test: String, password: &String) {
+    let decrypted = decrypt(password, &encrpt_test).await.unwrap();
+
+    
+    println!("Decrypted: {:?}", decrypted);
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]

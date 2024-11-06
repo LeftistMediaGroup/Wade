@@ -1,6 +1,7 @@
 use mongodb::{ Client, options::ClientOptions };
 use bson::{ doc, Document };
 use std::io::Error;
+use serde::Serialize;
 
 pub async fn create_database() {
     let client_options: ClientOptions = ClientOptions::parse(
@@ -41,12 +42,15 @@ pub async fn get_data(coll_name: &str, title: &str) -> Option<Document> {
     result
 }
 
-pub async fn put_data(coll_name: &str, doc: Document) {
+pub async fn put_data<T>(coll_name: &str, doc: T) where T: Serialize {
     let client_options = ClientOptions::parse("mongodb://localhost:27017").await.unwrap();
     let client = Client::with_options(client_options).unwrap();
 
-    let db = client.database(&String::from("Wade"));
-    let coll = db.collection(coll_name);
+    let db = client.database("Wade");
+    let coll = db.collection::<Document>(coll_name);
 
-    coll.insert_one(doc, None).await;
+    // Convert the document to a BSON Document
+    let bson_doc = mongodb::bson::to_document(&doc).unwrap();
+
+    coll.insert_one(bson_doc, None).await.unwrap();
 }
