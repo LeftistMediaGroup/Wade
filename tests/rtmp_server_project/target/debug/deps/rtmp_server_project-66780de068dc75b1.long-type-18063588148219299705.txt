@@ -1,0 +1,1 @@
+impl Future<Output = Result<Client, mongodb::error::Error>>
