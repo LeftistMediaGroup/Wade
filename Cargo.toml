@@ -28,3 +28,4 @@ random_name_generator = "0.3.6"
 home = "0.5.9"
 aes = "0.7.5"  # Check for the latest version on crates.io
 hex = "0.4"     # For encoding the encrypted bytes to a hex string
+futures = "0.3.31"

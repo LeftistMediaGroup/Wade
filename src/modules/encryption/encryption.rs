@@ -37,5 +37,9 @@ pub async fn generate_local_key() -> String {
 
     //println!("key: {:#?}", encoded_key);
 
-    encoded_key
+    let short_key = encoded_key.replace("/", "");
+
+    //println!("Short: {:?}", short_key);
+
+    short_key
 }
